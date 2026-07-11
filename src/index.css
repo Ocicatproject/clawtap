@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+
+
+@import "tailwindcss";
+
+
+.geist{
+  font-family: "Geist", sans-serif;
+  font-optical-sizing: auto;
+  font-weight:400;
+  font-style: normal;
+}
+
+
+@keyframes fillBar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-fill {
+  animation: fillBar 1s linear forwards;
+}
+
+
+
