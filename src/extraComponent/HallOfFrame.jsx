@@ -102,56 +102,62 @@ const HallOfFrame = () => {
     }
   };
 
- const confirmLogout = async () => {
+const confirmLogout = async () => {
   try {
-    // ✅ 1. Wallet disconnect (WalletConnect / MetaMask / etc.)
+    // 1. Wallet Disconnect (safely)
     if (walletProvider) {
       try {
         await walletProvider.disconnect();
       } catch (e) {
-        console.log("wallet disconnect error:", e);
+        console.log("Wallet disconnect error:", e);
       }
       walletProvider = null;
     }
 
-    // ✅ 2. Remove ALL WalletConnect sessions 🔥
+    // 2. Clear WalletConnect related keys first (before full clear)
     Object.keys(localStorage).forEach((key) => {
+      const lowerKey = key.toLowerCase();
       if (
-        key.toLowerCase().includes("walletconnect") ||
-        key.toLowerCase().includes("wc@") ||
-        key.toLowerCase().includes("wagmi") ||
-        key.toLowerCase().includes("web3")
+        lowerKey.includes("walletconnect") ||
+        lowerKey.includes("wc@") ||
+        lowerKey.includes("wagmi") ||
+        lowerKey.includes("web3")
       ) {
         localStorage.removeItem(key);
       }
     });
 
-    // ✅ 3. Clear FULL storage (important)
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // ✅ 4. Firebase logout (Google login সহ)
+    // 3. Firebase Sign Out
     try {
       await signOut(auth);
     } catch (e) {
-      console.log("firebase logout error:", e);
+      console.log("Firebase logout error:", e);
     }
 
-    // ✅ 5. IndexedDB clear (advanced – WalletConnect v2)
-    if (window.indexedDB) {
-      indexedDB.databases &&
-        indexedDB.databases().then((dbs) => {
-          dbs.forEach((db) => {
-            indexedDB.deleteDatabase(db.name);
-          });
+    // 4. Clear everything
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // 5. Optional: Clear IndexedDB (non-blocking)
+    if ("indexedDB" in window) {
+      try {
+        const dbs = await indexedDB.databases?.() || [];
+        dbs.forEach((db) => {
+          if (db.name) indexedDB.deleteDatabase(db.name);
         });
+      } catch (e) {
+        // Ignore if not supported
+        console.log("IndexedDB clear skipped");
+      }
     }
 
-    // ✅ 6. Force reload + redirect (SPA না)
-    window.location.replace("/");
+    // 6. Force full reload + redirect (সবচেয়ে গুরুত্বপূর্ণ)
+    window.location.replace("/");   // অথবা window.location.href = "/";
 
   } catch (err) {
     console.error("Logout failed:", err);
+    // এরর হলেও redirect করো
+    window.location.replace("/");
   }
 };
 

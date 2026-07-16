@@ -18,16 +18,16 @@ const Update = () => {
       "miningPurchase",
       "repair",
       "level",
-      "dailyReward",    
-      "dailyTask",   
+      "dailyReward",
+      "dailyTask",
       "telegramJoin",
       "youtubeSubscribed",
       "xFollow",
       "instaFollow",
       "tiktokFollow",
-      "ocicatFollow", 
-      "purchaseDate", 
-      "dailyTap" ,
+      "ocicatFollow",
+      "purchaseDate",
+      "dailyTap",
       "lastDate"
     ];
 
@@ -68,14 +68,15 @@ const Update = () => {
           }
         });
 
+        
+
         if (hasChange) {
           await fetch(
-            `https://claw-server-six.vercel.app/${user._id}`,
-            {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(updateData),
-            }
+            `https://claw-server-six.vercel.app/users/update-other/${user._id}`,            {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updateData),
+          }
           );
           console.log("✅ User updated from localStorage");
 
