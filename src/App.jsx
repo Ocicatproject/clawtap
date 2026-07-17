@@ -132,7 +132,56 @@ useEffect(() => {
 
 }, []);
 
+useEffect(() => {
 
+  const detectExtension = () => {
+
+    const extensions = [
+      "chrome-extension://"
+    ];
+
+    const scripts = [...document.scripts];
+
+    const found = scripts.some(script =>
+      extensions.some(ext =>
+        script.src.includes(ext)
+      )
+    );
+
+
+    if(found){
+      window.location.href="/404";
+    }
+
+  };
+
+
+  detectExtension();
+
+}, []);
+
+useEffect(() => {
+
+  const observer = new MutationObserver(() => {
+
+    console.log("Page modified");
+
+  });
+
+
+  observer.observe(
+    document.body,
+    {
+      childList:true,
+      subtree:true
+    }
+  );
+
+
+  return ()=>observer.disconnect();
+
+
+},[]);
 
 
 
