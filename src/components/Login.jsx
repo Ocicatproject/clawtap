@@ -59,6 +59,7 @@ const Login = () => {
     localStorage.setItem("id", userData._id || "");
     localStorage.setItem("bonus", userData.bonus);
     localStorage.setItem("dailyTap", userData.dailyTap);
+    
 
 
     // Save ALL user data
