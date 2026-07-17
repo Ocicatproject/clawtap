@@ -47,6 +47,7 @@ import X from './extraComponent/X.jsx';
 import InstaGram from './extraComponent/InstaGram.jsx';
 import Tiktok from './extraComponent/Tiktok.jsx';
 import Ocicat from './extraComponent/Ocicat.jsx';
+import Warning from './extraComponent/Warning.jsx';
 // import { AuthProvider } from './components/Authprovider.jsx';
 
 const router = createBrowserRouter([
@@ -215,6 +216,10 @@ const router = createBrowserRouter([
       {
           path:"/payment",
           element:<Payment></Payment>
+      },
+      {
+          path:"/securityWarning",
+          element:<Warning></Warning>
       }
 
 

@@ -203,7 +203,7 @@ const handleInstantClaim = () => {
     Number(localStorage.getItem("balance")) || 0;
 
 
-  // mining balance main balance e add
+  // Add mining balance
   const updatedBalance = mainBalance + currentMining;
 
   localStorage.setItem(
@@ -212,7 +212,7 @@ const handleInstantClaim = () => {
   );
 
 
-  // mining balance reset
+  // Reset only mining reward
   setMiningBalance(0);
 
   localStorage.setItem(
@@ -221,30 +221,16 @@ const handleInstantClaim = () => {
   );
 
 
-  // abar notun kore 10 hour mining start
-  const newStart = Date.now();
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    newStart.toString()
-  );
-
-  localStorage.setItem(
-    "lastIncrementTime",
-    newStart.toString()
-  );
-
-  localStorage.setItem(
-    "mining",
-    "true"
-  );
+  // ❌ Don't touch:
+  // miningStartTime
+  // lastIncrementTime
+  // mining status
+  // cooldown
 
 
-  setCooldown(MINING_DURATION);
-  setIsMining(true);
-
-  // instant claim hide
+  // Hide instant claim button
   setCanInstantClaim(false);
+
 };
 
 

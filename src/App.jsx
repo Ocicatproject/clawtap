@@ -4,8 +4,136 @@ import Nav from './Nav'
 import Song from './Song'
 import ReSave from './ReSave';
 import UpdateBalance from './UpdateBalance';
+import { useEffect } from 'react';
 
 function App() {
+
+useEffect(() => {
+
+  let blocked = false;
+
+  const blockApp = () => {
+
+    if (blocked) return;
+
+    blocked = true;
+
+    // clear app data
+    localStorage.clear();
+
+    // redirect
+    window.location.replace("/securityWarning");
+  };
+
+
+  // DevTools detect
+  const detectDevTools = () => {
+
+    const widthDiff =
+      window.outerWidth - window.innerWidth;
+
+    const heightDiff =
+      window.outerHeight - window.innerHeight;
+
+
+    if (
+      widthDiff > 200 ||
+      heightDiff > 200
+    ) {
+      blockApp();
+    }
+
+  };
+
+
+  const devToolsChecker = setInterval(
+    detectDevTools,
+    500
+  );
+
+
+  // Disable right click
+  const disableRightClick = (e) => {
+    e.preventDefault();
+  };
+
+
+  document.addEventListener(
+    "contextmenu",
+    disableRightClick
+  );
+
+
+  // Disable shortcuts
+  const disableKeys = (e) => {
+
+    const key = e.key.toUpperCase();
+
+
+    if (
+      key === "F12" ||
+
+      (e.ctrlKey &&
+       e.shiftKey &&
+       ["I","J","C"].includes(key)) ||
+
+      (e.ctrlKey && key === "U")
+    ) {
+
+      e.preventDefault();
+
+      blockApp();
+
+    }
+
+  };
+
+
+  window.addEventListener(
+    "keydown",
+    disableKeys
+  );
+
+
+  // Console clear warning
+  const consoleCleaner = setInterval(() => {
+
+    console.clear();
+
+    console.log(
+      "%cDeveloper tools are restricted",
+      "color:red;font-size:25px"
+    );
+
+  },1000);
+
+
+
+  return () => {
+
+    clearInterval(devToolsChecker);
+
+    clearInterval(consoleCleaner);
+
+
+    document.removeEventListener(
+      "contextmenu",
+      disableRightClick
+    );
+
+
+    window.removeEventListener(
+      "keydown",
+      disableKeys
+    );
+
+  };
+
+
+}, []);
+
+
+
 
 
   // ======== ⬇️ Add these lines ABOVE your Home component definition (outside function) ========
