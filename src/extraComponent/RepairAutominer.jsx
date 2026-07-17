@@ -27,6 +27,8 @@ const CLAIM_KEY = "claimPending";
 const RepairAutominer = () => {
   const navigate = useNavigate();
 
+  const [canInstantClaim, setCanInstantClaim] = useState(false);
+
   const [cooldown, setCooldown] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isMining, setIsMining] = useState(false);
@@ -86,47 +88,82 @@ const RepairAutominer = () => {
     if (withinTenDays) setRepair(true);
   }, []);
 
-  // Mining loop
-  useEffect(() => {
-    if (!isMining) return;
+ // Mining loop
+useEffect(() => {
+  if (!isMining) return;
 
-    const interval = setInterval(() => {
-      const storedStart = Number(localStorage.getItem(STORAGE_KEY));
-      if (!storedStart) return;
+  const interval = setInterval(() => {
+    const storedStart = Number(localStorage.getItem(STORAGE_KEY));
+    if (!storedStart) return;
 
-      const elapsed = Math.floor((Date.now() - storedStart) / 1000);
-      const remaining = MINING_DURATION - elapsed;
+    const elapsed = Math.floor((Date.now() - storedStart) / 1000);
+    const remaining = MINING_DURATION - elapsed;
 
-      if (remaining <= 0) {
-        setCooldown(0);
-        setIsMining(false);
-        setIsClaimAvailable(true);
-        localStorage.setItem("mining", "false");
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.setItem(CLAIM_KEY, "true");
-        return;
-      }
+    if (remaining <= 0) {
+      setCooldown(0);
+      setIsMining(false);
+      setIsClaimAvailable(true);
 
-      setCooldown(remaining);
+      localStorage.setItem("mining", "false");
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(CLAIM_KEY, "true");
 
-      // Increment mining balance
-      const lastIncrement = Number(localStorage.getItem("lastIncrementTime")) || storedStart;
-      const secondsPassed = Math.floor((Date.now() - lastIncrement) / 1000);
-      if (secondsPassed > 0) {
-        const profit = Number(localStorage.getItem("profit-per-click")) || 1;
-        const upgrade = Number(localStorage.getItem("upgrade-earn")) || 0;
-        const speed = Number(localStorage.getItem("speed-level")) || 1;
-        const add = secondsPassed * (profit + upgrade) * speed;
+      return;
+    }
 
-        const newBalance = miningBalance + add;
-        setMiningBalance(newBalance);
-        localStorage.setItem("mining-balance", newBalance);
-        localStorage.setItem("lastIncrementTime", Date.now().toString());
-      }
-    }, 1000);
+    setCooldown(remaining);
 
-    return () => clearInterval(interval);
-  }, [isMining, miningBalance]);
+    // Increment mining balance
+    const lastIncrement =
+      Number(localStorage.getItem("lastIncrementTime")) || storedStart;
+
+    const secondsPassed = Math.floor(
+      (Date.now() - lastIncrement) / 1000
+    );
+
+    if (secondsPassed > 0) {
+
+      const profit =
+        Number(localStorage.getItem("profit-per-click")) || 1;
+
+      const upgrade =
+        Number(localStorage.getItem("upgrade-earn")) || 0;
+
+      const speed =
+        Number(localStorage.getItem("speed-level")) || 1;
+
+
+      const add =
+        secondsPassed * (profit + upgrade) * speed;
+
+
+      const newBalance = miningBalance + add;
+
+
+      setMiningBalance(newBalance);
+
+      localStorage.setItem(
+        "mining-balance",
+        newBalance
+      );
+
+
+      localStorage.setItem(
+        "lastIncrementTime",
+        Date.now().toString()
+      );
+
+
+      // ✅ Mining balance hole instant claim available
+      setCanInstantClaim(true);
+    }
+
+  }, 1000);
+
+
+  return () => clearInterval(interval);
+
+}, [isMining, miningBalance]);
 
   // Start Mining
   const handleMining = () => {
@@ -154,6 +191,62 @@ const RepairAutominer = () => {
     setIsClaimAvailable(false);
     localStorage.removeItem(CLAIM_KEY);
   };
+
+const handleInstantClaim = () => {
+  const currentMining =
+    Number(localStorage.getItem("mining-balance")) || 0;
+
+  if (currentMining <= 0) return;
+
+
+  const mainBalance =
+    Number(localStorage.getItem("balance")) || 0;
+
+
+  // mining balance main balance e add
+  const updatedBalance = mainBalance + currentMining;
+
+  localStorage.setItem(
+    "balance",
+    updatedBalance
+  );
+
+
+  // mining balance reset
+  setMiningBalance(0);
+
+  localStorage.setItem(
+    "mining-balance",
+    0
+  );
+
+
+  // abar notun kore 10 hour mining start
+  const newStart = Date.now();
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    newStart.toString()
+  );
+
+  localStorage.setItem(
+    "lastIncrementTime",
+    newStart.toString()
+  );
+
+  localStorage.setItem(
+    "mining",
+    "true"
+  );
+
+
+  setCooldown(MINING_DURATION);
+  setIsMining(true);
+
+  // instant claim hide
+  setCanInstantClaim(false);
+};
+
 
   // Repair & Payment (updated with mobile deep link + polling)
   const handleRepair = async () => {
@@ -316,6 +409,19 @@ const RepairAutominer = () => {
           <img src={coin} alt="coin" className="h-7" /> {miningBalance.toLocaleString()}
         </p>
         <img src={autominer} alt="autominer" className="mt-4 pb-8 mx-auto" />
+
+
+
+{/* Instant Claim Button */}
+{isMining && canInstantClaim && miningBalance > 0 && (
+  <button
+    onClick={handleInstantClaim}
+    className="w-full mb-3 cursor-pointer py-4 rounded-lg text-sm text-white bg-[#7c2bff] hover:opacity-90"
+  >
+    Instant Claim {Math.floor(miningBalance).toLocaleString()}
+  </button>
+)}
+
 
         <div className="flex gap-2 w-full">
           {/* Mining Button */}
