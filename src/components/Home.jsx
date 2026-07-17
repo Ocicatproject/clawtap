@@ -31,6 +31,9 @@ const [dailyTap, setDailyTap] = useState(() => {
   return isNaN(stored) ? 0 : stored;
 });
 
+console.log("Home Start:", localStorage.getItem("level"));
+
+
   const [clicks, setClicks] = useState([]);
   const [animateLogo, setAnimateLogo] = useState(false);
   const [username, setUsername] = useState("Guest");
@@ -207,63 +210,50 @@ const [dailyTap, setDailyTap] = useState(() => {
     [energyLimitLevel]
   );
 
-  // ✅ Level Up Detection with Modal
-useEffect(() => {
-  if (!loginDate) return;
+ useEffect(() => {
+  // প্রথমে localStorage থেকে level পড়ে state সেট করো (যদি সেট না থাকে)
+  const savedLevel = localStorage.getItem("level") || "wood";
+  setLevel(savedLevel);
 
-  const today = new Date();
-  const loginD = new Date(loginDate);
-  const diffDays = Math.floor((today - loginD) / (1000 * 60 * 60 * 24));
+  // এখন balance-এর ভিত্তিতে শুধু আপগ্রেড চেক করো
+  if (!loginDate || balance === undefined) return;
 
-  const levels = ["wood", "stone", "bronze", "silver", "gold"];
-  const levelDays = { wood: 0, stone: 10, bronze: 20, silver: 30, gold: 40 };
+  const levelsOrder = ["wood", "stone", "bronze", "silver", "gold"];
+  const currentIdx = levelsOrder.indexOf(savedLevel);
 
-  // Determine level based on balance
-  let newLevel = "wood";
-  if (balance >= 1_000_000 && balance < 10_000_000) newLevel = "stone";
-  else if (balance >= 10_000_000 && balance < 100_000_000) newLevel = "bronze";
-  else if (balance >= 100_000_000 && balance < 1_000_000_000) newLevel = "silver";
-  else if (balance >= 1_000_000_000) newLevel = "gold";
+  let calculatedLevel = "wood";
+  if (balance >= 1000000 && balance < 10000000) calculatedLevel = "stone";
+  else if (balance >= 10000000 && balance < 100000000) calculatedLevel = "bronze";
+  else if (balance >= 100000000 && balance < 1000000000) calculatedLevel = "silver";
+  else if (balance >= 1000000000) calculatedLevel = "gold";
 
-  if (newLevel !== level) {
-    const currentIndex = levels.indexOf(level);
-    const newIndex = levels.indexOf(newLevel);
+  const newIdx = levelsOrder.indexOf(calculatedLevel);
 
-    // Upgrade: show modal only if new level is higher
-    if (newIndex > currentIndex) {
-      // Check if minimum days passed for upgrade
-      if (diffDays < levelDays[newLevel]) return;
+  // শুধু আপগ্রেড (newIdx > currentIdx) হলে কাজ করো
+  if (newIdx > currentIdx) {
+    const diffDays = Math.floor(
+      (new Date() - new Date(loginDate)) / (1000 * 60 * 60 * 24)
+    );
+    const minDays = { stone: 10, bronze: 20, silver: 30, gold: 40 };
+    if (diffDays < (minDays[calculatedLevel] || 0)) return;
 
-      // চেক করো: এই লেভেলের মডাল আগে দেখানো হয়েছে কি না?
-      const modalShownKey = `levelModalShown_${newLevel}`;
-      const alreadyShown = localStorage.getItem(modalShownKey) === "true";
-
-      if (!alreadyShown) {
-        setLevel(newLevel);
-        localStorage.setItem("level", newLevel);
-        localStorage.setItem("levelStartDate", new Date().toISOString());
-        setNewUnlockedLevel(newLevel);
-        setShowLevelModal(true);
-
-        // মার্ক করো যে এই লেভেলের মডাল দেখানো হয়েছে
-        localStorage.setItem(modalShownKey, "true");
-
-        const audio = new Audio(levelupmusic);
-        audio.play().catch((err) => console.error(err));
-      } else {
-        // আগে দেখানো হয়েছে → শুধু আপডেট করো
-        setLevel(newLevel);
-        localStorage.setItem("level", newLevel);
-        localStorage.setItem("levelStartDate", new Date().toISOString());
-      }
-    } else {
-      // Downgrade: just update level silently
-      setLevel(newLevel);
-      localStorage.setItem("level", newLevel);
-      localStorage.setItem("levelStartDate", new Date().toISOString());
+    // মডাল দেখাও
+    const modalKey = `levelModalShown_${calculatedLevel}`;
+    if (localStorage.getItem(modalKey) !== "true") {
+      setNewUnlockedLevel(calculatedLevel);
+      setShowLevelModal(true);
+      localStorage.setItem(modalKey, "true");
+      const audio = new Audio(levelupmusic);
+      audio.play().catch(() => {});
     }
+
+    // আপগ্রেড সেট করো
+    setLevel(calculatedLevel);
+    localStorage.setItem("level", calculatedLevel);
+    localStorage.setItem("levelStartDate", new Date().toISOString());
   }
-}, [balance, level, loginDate]);
+  // ডাউনগ্রেড (newIdx <= currentIdx) হলে কিছু করো না
+}, [balance, loginDate]);
 
 
   // ✅ Fetch users count

@@ -104,13 +104,20 @@ const Login = () => {
 
       }
 
-      // If user exists, save their ALL info to localStorage and navigate to home
       if (existingUser) {
-        console.log("Existing user found:", existingUser);
-        saveUserDataToLocalStorage(existingUser);
-        navigate("/home");
-        return true; // User exists
-      }
+
+  console.log("Full User:", existingUser);
+  console.log("DB Level:", existingUser.level);
+
+  saveUserDataToLocalStorage(existingUser);
+
+  console.log("Saved Level:", localStorage.getItem("level"));
+
+  console.log("Before Navigate:", localStorage.getItem("level"));
+  navigate("/home");
+
+  return true;
+}
 
       return false; // User doesn't exist
     } catch (err) {
