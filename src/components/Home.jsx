@@ -25,7 +25,7 @@ import bronzeCongrats from "../assets/cbronze.png";
 import silverCongrats from "../assets/csilver.png";
 import goldCongrats from "../assets/cgold.png";
 import celip from '../assets/congratselip.png';
-import RepairAutominer from "../extraComponent/RepairAutominer";
+// import RepairAutominer from "../extraComponent/RepairAutominer";
 const Home = () => {
 const [dailyTap, setDailyTap] = useState(() => {
   const stored = parseInt(localStorage.getItem("dailyTap"));
@@ -474,9 +474,9 @@ useEffect(() => {
       style={{ backgroundImage: `url(${backgroundimage})` }}
     >
       <Update></Update>
-      <div className="hidden">
+      {/* <div className="hidden">
         <RepairAutominer></RepairAutominer>
-      </div>
+      </div> */}
       {/* ✅ LEVEL-UP MODAL */}
       {showLevelModal && (
         <div className="fixed inset-0   flex items-center justify-center min-h-screen bg-black bg-opacity-70 z-[99999]">

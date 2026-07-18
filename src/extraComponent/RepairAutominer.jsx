@@ -39,6 +39,7 @@ const RepairAutominer = () => {
   const [pendingRepair, setPendingRepair] = useState(false); // mobile polling flag
 
   const MINING_DURATION = 10 * 60 * 60; // 10 hours
+  // const MINING_DURATION = 1 * 60; // 3 minutes (testing)
   const TEN_DAYS = 10 * 24 * 60 * 60; // 10 days in seconds
 
   // Helper to check purchaseDate
@@ -52,41 +53,57 @@ const RepairAutominer = () => {
   };
 
   // Load states on mount
-  useEffect(() => {
-    const storedMining = localStorage.getItem("mining") === "true";
-    const storedBalance = Number(localStorage.getItem("mining-balance")) || 0;
-    const storedRepair = localStorage.getItem(REPAIR_KEY) === "true";
-    const storedPurchase = ["true", "yes"].includes(localStorage.getItem("miningPurchase"));
+useEffect(() => {
+  const storedMining = localStorage.getItem("mining") === "true";
+  const storedBalance = Number(localStorage.getItem("mining-balance")) || 0;
+  const storedRepair = localStorage.getItem(REPAIR_KEY) === "true";
+  const storedPurchase = ["true", "yes"].includes(localStorage.getItem("miningPurchase"));
 
-    setRepair(storedRepair);
-    setMiningPurchase(storedPurchase);
-    setMiningBalance(storedBalance);
+  setRepair(storedRepair);
+  setMiningPurchase(storedPurchase);
+  setMiningBalance(storedBalance);
 
-    const withinTenDays = isWithinTenDays();
+  // ✅ ADD THIS
+  if (localStorage.getItem(CLAIM_KEY) === "true") {
+    setIsClaimAvailable(true);
+    setIsMining(false);
+    setCooldown(0);
+  }
 
-    // Mining cooldown check
-    if (storedMining && localStorage.getItem(STORAGE_KEY)) {
-      const elapsed = Math.floor((Date.now() - Number(localStorage.getItem(STORAGE_KEY))) / 1000);
-      const remaining = MINING_DURATION - elapsed;
-      if (remaining > 0) {
-        setCooldown(remaining);
-        setIsMining(true);
-      } else {
-        setCooldown(0);
-        setIsMining(false);
-        setIsClaimAvailable(true);
-        localStorage.setItem("mining", "false");
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.setItem(CLAIM_KEY, "true");
-      }
+  const withinTenDays = isWithinTenDays();
+
+  // Mining cooldown check
+  if (
+    localStorage.getItem(CLAIM_KEY) !== "true" &&
+    storedMining &&
+    localStorage.getItem(STORAGE_KEY)
+  ) {
+    const elapsed = Math.floor(
+      (Date.now() - Number(localStorage.getItem(STORAGE_KEY))) / 1000
+    );
+
+    const remaining = MINING_DURATION - elapsed;
+
+    if (remaining > 0) {
+      setCooldown(remaining);
+      setIsMining(true);
+    } else {
+      setCooldown(0);
+      setIsMining(false);
+      setIsClaimAvailable(true);
+
+      localStorage.setItem("mining", "false");
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(CLAIM_KEY, "true");
     }
+  }
 
-    // Disable mining button if 10 days passed
-    if (!withinTenDays) setIsMining(false);
+  // Disable mining button if 10 days passed
+  if (!withinTenDays) setIsMining(false);
 
-    // Disable repair button if 10 days not finished
-    if (withinTenDays) setRepair(true);
-  }, []);
+  // Disable repair button if 10 days not finished
+  if (withinTenDays) setRepair(true);
+}, []);
 
  // Mining loop
 useEffect(() => {
@@ -182,15 +199,27 @@ useEffect(() => {
   };
 
   // Claim Mining Balance
-  const handleClaim = () => {
-    const mainBalance = Number(localStorage.getItem("balance")) || 30000000;
-    localStorage.setItem("balance", mainBalance + miningBalance);
-    setMiningBalance(0);
-    localStorage.setItem("mining-balance", 0);
-    setCooldown(0);
-    setIsClaimAvailable(false);
-    localStorage.removeItem(CLAIM_KEY);
-  };
+ const handleClaim = () => {
+  const mainBalance = Number(localStorage.getItem("balance")) || 30000000;
+
+  // Add mining reward to main balance
+  localStorage.setItem("balance", mainBalance + miningBalance);
+
+  // Reset mining reward
+  setMiningBalance(0);
+  localStorage.setItem("mining-balance", 0);
+
+  // Reset states
+  setCooldown(0);
+  setIsClaimAvailable(false);
+  setIsMining(false);
+
+  // Clear storage
+  localStorage.removeItem(CLAIM_KEY);
+  localStorage.setItem("mining", "false");
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem("lastIncrementTime");
+};
 
 const handleInstantClaim = () => {
   const currentMining =
@@ -412,17 +441,33 @@ const handleInstantClaim = () => {
         <div className="flex gap-2 w-full">
           {/* Mining Button */}
           <button
-            onClick={handleMining}
-            disabled={!isWithinTenDays() || !(repair || miningPurchase) || cooldown > 0}
-            className={`w-full py-4 rounded-lg text-sm text-white shadow-lg transition ${
-              !isWithinTenDays() || !(repair || miningPurchase) || cooldown > 0
-                ? "bg-[#782AF9]/50 cursor-not-allowed"
-                : "bg-[#782AF9] hover:opacity-90"
-            }`}
-            style={{ borderRadius: "9px" }}
-          >
-            {isMining ? `Mining ${formatTimeForButton(cooldown)}` : "Start Mining"}
-          </button>
+  onClick={isClaimAvailable ? handleClaim : handleMining}
+  disabled={
+    isMining
+      ? true
+      : !isClaimAvailable &&
+        (!isWithinTenDays() ||
+          !(repair || miningPurchase) ||
+          cooldown > 0)
+  }
+  className={`w-full py-4 rounded-lg text-sm text-white shadow-lg transition ${
+    isMining
+      ? "bg-[#782AF9]/50 cursor-not-allowed"
+      : !isClaimAvailable &&
+        (!isWithinTenDays() ||
+          !(repair || miningPurchase) ||
+          cooldown > 0)
+      ? "bg-[#782AF9]/50 cursor-not-allowed"
+      : "bg-[#782AF9] hover:opacity-90"
+  }`}
+  style={{ borderRadius: "9px" }}
+>
+  {isMining
+    ? `Mining ${formatTimeForButton(cooldown)}`
+    : isClaimAvailable
+    ? "Claim"
+    : "Start Mining"}
+</button>
 
           {/* Repair Button */}
           <button
