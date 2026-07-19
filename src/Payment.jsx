@@ -186,7 +186,7 @@ export default function PaymentBNBMainnet() {
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold mb-4">BNB Payment (Mainnet)</h1>
       <p className="text-gray-400 mb-8">
-        Network: {NETWORK.name} | Receiver: {RECEIVER.slice(0, 6)}...{RECEIVER.slice(-4)}
+        Networks: {NETWORK.name} | Receiver: {RECEIVER.slice(0, 6)}...{RECEIVER.slice(-4)}
       </p>
 
       {statusMessage && <p className="text-yellow-300 mb-6 text-center">{statusMessage}</p>}
