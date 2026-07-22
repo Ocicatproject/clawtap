@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import silver from '../assets/Silver.png';
+import silver from '../assets/SIlver.png';
 import silverstar from '../assets/silverstar.png';
 import arrow from '../assets/arrow-right.svg';
 
