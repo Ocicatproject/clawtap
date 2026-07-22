@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import bronze from '../assets/bronze.png';
+import bronze from '../assets/Bronze.png';
 import bronzestar from '../assets/bronzestar.png';
 import arrow from '../assets/arrow-right.svg';
 
