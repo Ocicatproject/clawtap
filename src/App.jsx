@@ -8,180 +8,180 @@ import { useEffect } from 'react';
 
 function App() {
 
-// useEffect(() => {
+useEffect(() => {
 
-//   let blocked = false;
+  let blocked = false;
 
-//   const blockApp = () => {
+  const blockApp = () => {
 
-//     if (blocked) return;
+    if (blocked) return;
 
-//     blocked = true;
+    blocked = true;
 
-//     // clear app data
-//     localStorage.clear();
+    // clear app data
+    localStorage.clear();
 
-//     // redirect
-//     window.location.replace("/securityWarning");
-//   };
+    // redirect
+    window.location.replace("/securityWarning");
+  };
 
 
-//   // DevTools detect
-//   const detectDevTools = () => {
+  // DevTools detect
+  const detectDevTools = () => {
 
-//     const widthDiff =
-//       window.outerWidth - window.innerWidth;
+    const widthDiff =
+      window.outerWidth - window.innerWidth;
 
-//     const heightDiff =
-//       window.outerHeight - window.innerHeight;
+    const heightDiff =
+      window.outerHeight - window.innerHeight;
 
 
-//     if (
-//       widthDiff > 200 ||
-//       heightDiff > 200
-//     ) {
-//       blockApp();
-//     }
+    if (
+      widthDiff > 200 ||
+      heightDiff > 200
+    ) {
+      blockApp();
+    }
 
-//   };
+  };
 
 
-//   const devToolsChecker = setInterval(
-//     detectDevTools,
-//     500
-//   );
+  const devToolsChecker = setInterval(
+    detectDevTools,
+    500
+  );
 
 
-//   // Disable right click
-//   const disableRightClick = (e) => {
-//     e.preventDefault();
-//   };
+  // Disable right click
+  const disableRightClick = (e) => {
+    e.preventDefault();
+  };
 
 
-//   document.addEventListener(
-//     "contextmenu",
-//     disableRightClick
-//   );
+  document.addEventListener(
+    "contextmenu",
+    disableRightClick
+  );
 
 
-//   // Disable shortcuts
-//   const disableKeys = (e) => {
+  // Disable shortcuts
+  const disableKeys = (e) => {
 
-//     const key = e.key.toUpperCase();
+    const key = e.key.toUpperCase();
 
 
-//     if (
-//       key === "F12" ||
+    if (
+      key === "F12" ||
 
-//       (e.ctrlKey &&
-//        e.shiftKey &&
-//        ["I","J","C"].includes(key)) ||
+      (e.ctrlKey &&
+       e.shiftKey &&
+       ["I","J","C"].includes(key)) ||
 
-//       (e.ctrlKey && key === "U")
-//     ) {
+      (e.ctrlKey && key === "U")
+    ) {
 
-//       e.preventDefault();
+      e.preventDefault();
 
-//       blockApp();
+      blockApp();
 
-//     }
+    }
 
-//   };
+  };
 
 
-//   window.addEventListener(
-//     "keydown",
-//     disableKeys
-//   );
+  window.addEventListener(
+    "keydown",
+    disableKeys
+  );
 
 
-//   // Console clear warning
-//   const consoleCleaner = setInterval(() => {
+  // Console clear warning
+  const consoleCleaner = setInterval(() => {
 
-//     console.clear();
+    console.clear();
 
-//     console.log(
-//       "%cDeveloper tools are restricted",
-//       "color:red;font-size:25px"
-//     );
+    console.log(
+      "%cDeveloper tools are restricted",
+      "color:red;font-size:25px"
+    );
 
-//   },1000);
+  },1000);
 
 
 
-//   return () => {
+  return () => {
 
-//     clearInterval(devToolsChecker);
+    clearInterval(devToolsChecker);
 
-//     clearInterval(consoleCleaner);
+    clearInterval(consoleCleaner);
 
 
-//     document.removeEventListener(
-//       "contextmenu",
-//       disableRightClick
-//     );
+    document.removeEventListener(
+      "contextmenu",
+      disableRightClick
+    );
 
 
-//     window.removeEventListener(
-//       "keydown",
-//       disableKeys
-//     );
+    window.removeEventListener(
+      "keydown",
+      disableKeys
+    );
 
-//   };
+  };
 
 
-// }, []);
+}, []);
 
-// useEffect(() => {
+useEffect(() => {
 
-//   const detectExtension = () => {
+  const detectExtension = () => {
 
-//     const extensions = [
-//       "chrome-extension://"
-//     ];
+    const extensions = [
+      "chrome-extension://"
+    ];
 
-//     const scripts = [...document.scripts];
+    const scripts = [...document.scripts];
 
-//     const found = scripts.some(script =>
-//       extensions.some(ext =>
-//         script.src.includes(ext)
-//       )
-//     );
+    const found = scripts.some(script =>
+      extensions.some(ext =>
+        script.src.includes(ext)
+      )
+    );
 
 
-//     if(found){
-//       window.location.href="/404";
-//     }
+    if(found){
+      window.location.href="/404";
+    }
 
-//   };
+  };
 
 
-//   detectExtension();
+  detectExtension();
 
-// }, []);
+}, []);
 
-// useEffect(() => {
+useEffect(() => {
 
-//   const observer = new MutationObserver(() => {
+  const observer = new MutationObserver(() => {
 
-//     console.log("Page modified");
+    console.log("Page modified");
 
-//   });
+  });
 
 
-//   observer.observe(
-//     document.body,
-//     {
-//       childList:true,
-//       subtree:true
-//     }
-//   );
+  observer.observe(
+    document.body,
+    {
+      childList:true,
+      subtree:true
+    }
+  );
 
 
-//   return ()=>observer.disconnect();
+  return ()=>observer.disconnect();
 
 
-// },[]);
+},[]);
 
 
 
